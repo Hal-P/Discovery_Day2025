@@ -10,6 +10,8 @@ This document is the r-code I will be using to clean and merge the data I need f
 *Loading in the Data*
 ```{r include=FALSE}
 # The "here" library will let me read the data from an individual folder.
+
+install.packages("here")
 library(here)
 
 # I read the data and put it in a dataframe Object.
@@ -19,4 +21,28 @@ baseline <- read.csv(here("Data", "Baselinesurvey.CSV"), header = FALSE, sep = "
 daily <- read.csv(here("Data", "DailySummaries_2025.CSV"), header = FALSE, sep = ",") # Read the file
 
 Bed <- read.csv(here("Data", "DailyTimeInBed_2025.CSV"), header = FALSE, sep = ",") # Read the file
+```
+
+
+Starting with Baseline Data I will rename and clean the variables. 
+
+```{r include=FALSE}
+# We are getting rid of the uncessary rows above our data
+Baseline_dtx <- Baseline_dtx[-c(1:2),] # delete rows 1:2
+
+
+# Here we are re-naming our essential variables we want from Baseline
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B01"]<-"ID"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B02"]<-"DOB"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B03"]<-"sex"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B04"]<-"ethn"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B05"]<-"race"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B06"]<-"marital.st"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B07"]<-"living" 
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B08"]<-"occupation"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B09"]<-"education" 
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B10"]<-"research"   
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B11"]<-"research.time"  
+names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B12"]<-"rank.gif" 
+
 ```
