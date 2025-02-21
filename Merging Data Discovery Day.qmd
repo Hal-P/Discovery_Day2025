@@ -1,0 +1,22 @@
+---
+title: "Merging Data Discovery Day"
+author: "Halle Prine"
+format: html
+editor: visual
+---
+
+This document is the r-code I will be using to clean and merge the data I need for Discovery Day 2025!
+
+*Loading in the Data*
+```{r include=FALSE}
+# The "here" library will let me read the data from an individual folder.
+library(here)
+
+# I read the data and put it in a dataframe Object.
+
+baseline <- read.csv(here("Data", "Baselinesurvey.CSV"), header = FALSE, sep = ",") # Read the file
+
+daily <- read.csv(here("Data", "DailySummaries_2025.CSV"), header = FALSE, sep = ",") # Read the file
+
+Bed <- read.csv(here("Data", "DailyTimeInBed_2025.CSV"), header = FALSE, sep = ",") # Read the file
+```
