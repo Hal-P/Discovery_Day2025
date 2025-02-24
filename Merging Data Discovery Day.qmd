@@ -9,40 +9,280 @@ This document is the r-code I will be using to clean and merge the data I need f
 
 *Loading in the Data*
 ```{r include=FALSE}
-# The "here" library will let me read the data from an individual folder.
+# The "here" library will let me read the data from an individual folder.The dplyr will allow me to clean the data by sorting out participants that have less than 17 days of daily or bed data. 
 
+install.packages("dplyr")
 install.packages("here")
+
+library(dplyr)
 library(here)
 
-# I read the data and put it in a dataframe Object.
+# I read the data and put it in a data frame object.
 
-baseline <- read.csv(here("Data", "Baselinesurvey.CSV"), header = FALSE, sep = ",") # Read the file
+baseline <- read.csv(here("Data", "Baselinesurvey.CSV"), header = FALSE, sep = ",") 
 
-daily <- read.csv(here("Data", "DailySummaries_2025.CSV"), header = FALSE, sep = ",") # Read the file
+daily <- read.csv(here("Data", "DailySummaries_2025.CSV"), header = FALSE, sep = ",") 
 
-Bed <- read.csv(here("Data", "DailyTimeInBed_2025.CSV"), header = FALSE, sep = ",") # Read the file
+bed <- read.csv(here("Data", "DailyTimeInBed_2025.CSV"), header = FALSE, sep = ",") 
+
+moca <- read.csv(here("Data", "MOCA Scores.CSV"), header = FALSE, sep = ",")
+
+
 ```
 
 
 Starting with Baseline Data I will rename and clean the variables. 
 
 ```{r include=FALSE}
-# We are getting rid of the uncessary rows above our data
-Baseline_dtx <- Baseline_dtx[-c(1:2),] # delete rows 1:2
+# Remove the first, second, and third rows but keep everything below
+baseline <- baseline[-c(1,2,3), ]
+
+# Reset row indices
+rownames(baseline) <- NULL
+
+View(baseline)
+
+# Here we are re-naming our essential variables we want from the Baseline data
+names(baseline)[names(baseline)=="V18"]<-"ID"   
+names(baseline)[names(baseline)=="V19"]<-"DOB"   
+names(baseline)[names(baseline)=="V20"]<-"sex"   
+names(baseline)[names(baseline)=="V21"]<-"ethnicity"   
+names(baseline)[names(baseline)=="V22"]<-"race"   
+names(baseline)[names(baseline)=="V23"]<-"marital.st"   
+names(baseline)[names(baseline)=="V24"]<-"alone" 
+names(baseline)[names(baseline)=="V25"]<-"occupation"   
+names(baseline)[names(baseline)=="V26"]<-"education" 
+names(baseline)[names(baseline)=="V27"]<-"research.exp"   
+names(baseline)[names(baseline)=="V28"]<-"research.time"  
+```
 
 
-# Here we are re-naming our essential variables we want from Baseline
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B01"]<-"ID"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B02"]<-"DOB"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B03"]<-"sex"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B04"]<-"ethn"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B05"]<-"race"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B06"]<-"marital.st"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B07"]<-"living" 
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B08"]<-"occupation"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B09"]<-"education" 
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B10"]<-"research"   
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B11"]<-"research.time"  
-names(Baseline_dtx)[names(Baseline_dtx)=="DEM_B12"]<-"rank.gif" 
+I will do the same thing to the Pal-daily summaries and time in bed data. 
+
+```{r include=FALSE}
+
+# Here we are re-naming our variables we want from the Pal-daily summaries data
+names(daily)[names(daily)=="V1"]<-"Folder"
+names(daily)[names(daily)=="V2"]<-"Filename"
+names(daily)[names(daily)=="V3"]<-"Serial Number"
+names(daily)[names(daily)=="V4"]<-"File Code"
+names(daily)[names(daily)=="V5"]<-"ID" 
+names(daily)[names(daily)=="V6"]<-"Day of Week"
+names(daily)[names(daily)=="V7"]<-"Date"
+names(daily)[names(daily)=="V8"]<-"Valid Day"
+names(daily)[names(daily)=="V9"]<-"Inverted wear correction"
+names(daily)[names(daily)=="V10"]<-"Alignment (%)"
+names(daily)[names(daily)=="V11"]<-"Total Time (m)"
+names(daily)[names(daily)=="V12"]<-"Data Errors (m)"
+names(daily)[names(daily)=="V13"]<-"Total Num Steps"
+names(daily)[names(daily)=="V14"]<-"Num Cycling Steps"
+names(daily)[names(daily)=="V15"]<-"Upright Time(m)"
+names(daily)[names(daily)=="V16"]<-"Standing Time(m)"
+names(daily)[names(daily)=="V17"]<-"Total Stepping Time(m)"
+names(daily)[names(daily)=="V18"]<-"Cycling Time(m)"
+names(daily)[names(daily)=="V19"]<-"Sitting Time(m)"
+names(daily)[names(daily)=="V20"]<-"Seated Transport Time(m)"
+names(daily)[names(daily)=="V21"]<-"Primary Lying Time(m)"
+names(daily)[names(daily)=="V22"]<-"Secondary Lying Time(m)"
+names(daily)[names(daily)=="V23"]<-"Non Wear Time(m)"
+names(daily)[names(daily)=="V24"]<-"Num Sit To Stand Transitions"
+names(daily)[names(daily)=="V25"]<-"Num Stand To Sit Transitions"
+names(daily)[names(daily)=="V26"]<-"MET"
+names(daily)[names(daily)=="V27"]<-"Num Sitting Bouts >30m"
+names(daily)[names(daily)=="V28"]<-"Num Sitting Bouts >60m"
+names(daily)[names(daily)=="V29"]<-"Time Spent In Sitting Bouts >30m"
+names(daily)[names(daily)=="V30"]<-"Time Spent In Sitting Bouts >60m"
+names(daily)[names(daily)=="V31"]<-"Stepping Time(m) (duration <1m)"
+names(daily)[names(daily)=="V32"]<-"Stepping Time(m) (duration >1m <=5m)"
+names(daily)[names(daily)=="V33"]<-"Stepping Time(m) (duration >5m <=10m)"
+names(daily)[names(daily)=="V34"]<-"Stepping Time(m) (duration >10m <=20m)"
+names(daily)[names(daily)=="V35"]<-"Stepping Time(m) (duration >20m)"
+names(daily)[names(daily)=="V36"]<-"Num Steps (duration <=1m)"
+names(daily)[names(daily)=="V37"]<-"Num Steps (duration >1m <=5m)"
+names(daily)[names(daily)=="V38"]<-"Num Steps (duration >5m <=10m)"
+names(daily)[names(daily)=="V39"]<-"Num Steps (duration >10m <=20m)"
+names(daily)[names(daily)=="V40"]<-"Num Steps (duration >20m)"
+names(daily)[names(daily)=="V41"]<-"Stepping Time(m) (Cadence>=75)"
+names(daily)[names(daily)=="V42"]<-"Stepping Time(m) (Cadence>=75, duration>1m)"
+names(daily)[names(daily)=="V43"]<-"Num Steps (Cadence>=75)"
+names(daily)[names(daily)=="V44"]<-"Num Steps (Cadence>=75, duration>1m)"
+names(daily)[names(daily)=="V45"]<-"ST_100Cad"
+names(daily)[names(daily)=="V46"]<-"ST_100Cad_1m"
+names(daily)[names(daily)=="V47"]<-"NS_100Cad"
+names(daily)[names(daily)=="V48"]<-"NS_100Cad_1m"
+
+daily <- daily[-1, ]  
+rownames(daily) <- NULL  # Reset row indices
+colnames(daily)
+
+
+View(daily)
+
+# Here we are re-naming our variables we want from the Time in Bed data
+names(bed)[names(bed)=="V1"]<-"Folder"
+names(bed)[names(bed)=="V2"]<-"Filename"
+names(bed)[names(bed)=="V3"]<-"Serial Number"
+names(bed)[names(bed)=="V4"]<-"File Code"
+names(bed)[names(bed)=="V5"]<-"ID" 
+names(bed)[names(bed)=="V6"]<-"Waking Day Before TIB"
+names(bed)[names(bed)=="V7"]<-"Waking Day After TIB"
+names(bed)[names(bed)=="V8"]<-"Week Days"
+names(bed)[names(bed)=="V9"]<-"Valid Day"
+names(bed)[names(bed)=="V10"]<-"TIB Start Date"
+names(bed)[names(bed)=="V11"]<-"TIB Start Time"
+names(bed)[names(bed)=="V12"]<-"Date"
+names(bed)[names(bed)=="V13"]<-"TIB End Time"
+names(bed)[names(bed)=="V14"]<-"TIB duration (h)"
+
+bed <- bed[-1, ]  
+rownames(bed) <- NULL  # Reset row indices
+
+View(bed)
+```
+
+We wont need to re-name any variables within the MOCA data file since I've 
+cleaned the data by hand into an excel sheet from SPARC's measurement Tab. 
+
+
+Now I will go into the Daily and Bed data from the ActivPal and take out any cases 
+that have less than 17 days of ActivPal data. I will also cut data that has more 
+than 20 days to exactly 20 days. 
+
+```{r include=FALSE}
+
+# The code below wasn't running so I checked the data frame's columns names to 
+# check is "ID" is in the data frame.
+colnames(daily) # It is in the data frame
+
+#Now I'm going to check if there are values in the ID column and check the class
+head(daily$ID) # There are values
+class(daily$ID) # I see that it's classified as a character so I need to make it 
+# a factor. 
+
+daily$ID <- as.factor(daily$ID) # Making ID a factor
+bed$ID <- as.factor(bed$ID)
+# Count the number of days each participant has data for in 'daily' and 'bed'
+
+daily_filtered <- daily %>%
+  group_by(ID) %>%
+  filter(n() >= 17) %>%  # Keep IDs with at least 17 days
+  arrange(Date) %>%  # Arrange by Date (optional but helpful)
+  filter(row_number() <= 20) %>%  # Keep only the first 20 rows per ID
+  ungroup()
+
+bed_filtered <- bed %>%
+  group_by(ID) %>%
+  filter(n() >= 17) %>%  # Keep IDs with at least 17 days
+  arrange(Date) %>%  # Arrange by Date (optional)
+  filter(row_number() <= 20) %>%  # Keep only the first 20 rows per ID
+  ungroup()
+
+
+# remove any duplicates 
+daily_filtered <- daily_filtered %>%
+  group_by(ID, Date) %>%
+  slice_head(n = 1) %>%  # Keep the first row per ID-Date
+  ungroup()
+
+bed_filtered <- bed_filtered %>%
+  group_by(ID, Date) %>%
+  slice_head(n = 1) %>%  # Keep the first row per ID-Date
+  ungroup()
+
+
+```
+
+
+Time to merge ActivPal Data together from the daily summaries and time in bed data
+
+```{r include=FALSE}
+
+# We will be left joining the two by ID and Date just double checking if date was
+# the same class between the two data frames. 
+
+class(bed_filtered$Date)
+
+class(daily_filtered$Date)
+
+pal <- left_join(bed_filtered, daily_filtered, by = c("ID", "Date"))
+View(pal)
+
+pal %>%
+  count(ID) %>%
+  print()
+
+```
+
+
+Now I need to clean and rename columns in the moca data frame
+
+```{r include=FALSE}
+
+View(moca)
+
+# rename the columns 
+names(moca)[names(moca)=="V1"]<-"ID"
+names(moca)[names(moca)=="V2"]<-"Date.MoCA_1"
+names(moca)[names(moca)=="V3"]<-"MoCA_1"
+names(moca)[names(moca)=="V4"]<-"Date.MoCA_2"
+names(moca)[names(moca)=="V5"]<-"MoCA_2"
+
+moca <- moca[, -6]
+moca <- moca[-1, ] 
+```
+
+
+Now I want to filter the MoCA ID's to match the Pal data ID's so we can merge 
+the two data frames. 
+
+```{r include=FALSE}
+
+# Filter moca to include only IDs that are in pal
+moca_filtered <- moca %>%
+  filter(ID %in% unique(pal$ID))
+
+View(moca_filtered)
+
+# Join the repeated MoCA data with pal
+pal_moca <- left_join(pal, moca, by = "ID")
+
+# View the result
+pal_moca %>%
+  group_by(ID) %>%
+  tally()  # Should return ≈20 per ID
+
+View(pal_moca)
+
+write.csv(pal_moca, "pal_moca.csv", row.names = FALSE)
+
+```
+
+
+Ok...now for the final merge with the baseline data and the pal_moca data frame.
+
+```{r include=FALSE}
+# Check class on baseline data frame's ID and make it a factor so we can merge
+class(baseline$ID)
+baseline$ID <- as.factor(baseline$ID)
+
+# Cut the ID's from baseline that are not included in the final analyses
+baseline_filtered <- baseline %>%
+  filter(ID %in% pal_moca$ID)
+
+baseline_unique <- baseline_filtered %>%
+  group_by(ID) %>%
+  slice(1) %>%
+  ungroup()
+
+# Now do the final merge
+discover25.dta <- left_join(pal_moca, baseline_unique, by = "ID")
+
+# check for unintentional duplication
+table(duplicated(discover25.dta$ID))  # Should return FALSE for all
+
+count(discover25.dta, ID)  # Should still show 20 rows per ID
+View(discover25.dta)
+
+write.csv(discover25.dta, "discover25_dta.csv", row.names = FALSE)
 
 ```
